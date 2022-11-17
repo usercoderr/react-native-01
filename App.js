@@ -1,16 +1,9 @@
-import { StatusBar } from "expo-status-bar";
-import { useState } from "react";
-import {
-  Button,
-  FlatList,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import GoalInput from "./components/GoalInput";
-// import GoalItem from "./components/GoalItem";
+import { useState } from 'react';
+import { StyleSheet, View, FlatList, Button } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+
+import GoalItem from './components/GoalItem';
+import GoalInput from './components/GoalInput';
 
 export default function App() {
   const [modalIsVisible, setModalIsVisible] = useState(false);
@@ -19,6 +12,7 @@ export default function App() {
   function startAddGoalHandler() {
     setModalIsVisible(true);
   }
+
   function endAddGoalHandler() {
     setModalIsVisible(false);
   }
@@ -26,13 +20,14 @@ export default function App() {
   function addGoalHandler(enteredGoalText) {
     setCourseGoals((currentCourseGoals) => [
       ...currentCourseGoals,
-      { text: enteredGoalText, id: Math.random() },
-      endAddGoalHandler(),
+      { text: enteredGoalText, id: Math.random().toString() },
     ]);
+    endAddGoalHandler();
   }
-  function deleteGoalHandler() {
+
+  function deleteGoalHandler(id) {
     setCourseGoals((currentCourseGoals) => {
-      return currentCourseGoals.filter((goal) => goal.id !== goal.id);
+      return currentCourseGoals.filter((goal) => goal.id !== id);
     });
   }
 
@@ -42,7 +37,7 @@ export default function App() {
       <View style={styles.appContainer}>
         <Button
           title="Add New Goal"
-          color="white"
+          color="#a065ec"
           onPress={startAddGoalHandler}
         />
         <GoalInput
@@ -51,18 +46,22 @@ export default function App() {
           onCancel={endAddGoalHandler}
         />
         <View style={styles.goalsContainer}>
-          <ScrollView alwaysBounceVertical={false}>
-            {courseGoals.map((goal) => (
-              <Pressable
-                android_ripple={{ color: "#210644" }}
-                style={({ pressed }) => pressed && styles.pressedItem}
-                onPress={deleteGoalHandler}
-                key={goal.id}
-              >
-                <Text style={styles.goalItemText}>{goal.text}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
+          <FlatList
+            data={courseGoals}
+            renderItem={(itemData) => {
+              return (
+                <GoalItem
+                  text={itemData.item.text}
+                  id={itemData.item.id}
+                  onDeleteItem={deleteGoalHandler}
+                />
+              );
+            }}
+            keyExtractor={(item, index) => {
+              return item.id;
+            }}
+            alwaysBounceVertical={false}
+          />
         </View>
       </View>
     </>
@@ -72,23 +71,10 @@ export default function App() {
 const styles = StyleSheet.create({
   appContainer: {
     flex: 1,
-    paddingTop: 60,
+    paddingTop: 50,
     paddingHorizontal: 16,
   },
-
   goalsContainer: {
     flex: 5,
-  },
-  goalItem: {
-    margin: 8,
-    borderRadius: 6,
-    backgroundColor: "#5e0acc",
-  },
-  pressedItem: {
-    opacity: 0.5,
-  },
-  goalItemText: {
-    padding: 8,
-    color: "white",
   },
 });
